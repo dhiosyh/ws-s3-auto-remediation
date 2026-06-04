@@ -4,8 +4,9 @@ Proyek ini merupakan sistem mitigasi dan remediasi keamanan otomatis (*auto-reme
 
 ## 👥 Anggota Kelompok
 * **Dhio Rahmansyah** - Teknik Komputer, Fakultas Ilmu Komputer, Universitas Brawijaya
-* 
-* 
+* **Akmal Ahmad Ghozali** - Teknik Komputer, Fakultas Ilmu Komputer, Universitas Brawijaya
+* **Muhfi Fawwaz Rizqullah** - Teknik Komputer, Fakultas Ilmu Komputer, Universitas Brawijaya
+* **Muhammad Irsyaddhia Fahlevi** - Teknik Komputer, Fakultas Ilmu Komputer, Universitas Brawijaya
 
 ---
 
