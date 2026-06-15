@@ -1,33 +1,41 @@
 import boto3
 import json
-import time
 
 def lambda_handler(event, context):
-    BUCKET_NAME = 'data-rahasia-kelompokku-123'
-    s3 = boto3.client('s3')
+    s3_client = boto3.client('s3')
+    sns_client = boto3.client('sns') # Agen untuk kirim email instan
+    
+    bucket_name = 'data-rahasia-kelompokku-123'
+    # ARN SNS tujuan notifikasi darurat
+    sns_topic_arn = 'arn:aws:sns:us-east-1:005445459855:S3-Activity-Notification' 
     
     try:
-        # 1. Matikan semua "Block Public Access"
-        s3.put_public_access_block(
-            Bucket=BUCKET_NAME,
+        # Aksi 1: Membuka gembok S3 (Simulasi Kebocoran Data)
+        s3_client.put_public_access_block(
+            Bucket=bucket_name,
             PublicAccessBlockConfiguration={
-                'BlockPublicAcls': False, 'IgnorePublicAcls': False,
-                'BlockPublicPolicy': False, 'RestrictPublicBuckets': False
+                'BlockPublicAcls': False,
+                'IgnorePublicAcls': False,
+                'BlockPublicPolicy': False,
+                'RestrictPublicBuckets': False
             }
         )
-        time.sleep(2)
         
-        # 2. Pasang Policy "Public Read" (Simulasi Kebocoran)
-        public_policy = {
-            "Version": "2012-10-17",
-            "Statement": [{
-                "Effect": "Allow",
-                "Principal": "*",
-                "Action": "s3:GetObject",
-                "Resource": f"arn:aws:s3:::{BUCKET_NAME}/*"
-            }]
+        # Aksi 2: Menyebarkan peringatan darurat seketika via SNS
+        pesan_darurat = f"PERINGATAN DARURAT: Gembok Public Access pada bucket {bucket_name} telah dimatikan (OFF) oleh Breaker!"
+        sns_client.publish(
+            TopicArn=sns_topic_arn,
+            Subject="ALARM: S3 Terbuka Ke Publik!",
+            Message=pesan_darurat
+        )
+        
+        return {
+            'statusCode': 200,
+            'body': json.dumps('Breaker sukses membuka gembok dan email peringatan telah dikirim!')
         }
-        s3.put_bucket_policy(Bucket=BUCKET_NAME, Policy=json.dumps(public_policy))
-        return {'statusCode': 200, 'body': json.dumps('Celah Keamanan Terbuka!')}
+        
     except Exception as e:
-        return {'statusCode': 500, 'body': json.dumps(str(e))}
+        return {
+            'statusCode': 500,
+            'body': json.dumps(f'Gagal mengeksekusi: {str(e)}')
+        }
