@@ -30,11 +30,15 @@ Proyek arsitektur *cloud* ini mengimplementasikan sistem mitigasi komprehensif y
 ---
 
 ## 📂 Struktur Direktori Repository
+
+```text
+.
 ├── src/
-│   ├── breaker.py          # Skrip simulasi serangan & trigger email instan via SNS
-│   └── guardian.py         # Skrip remediasi otomatis untuk mengunci kembali S3
+│   ├── breaker.py          # Skrip simulasi serangan & trigger email instan
+│   └── guardian.py         # Skrip remediasi otomatis untuk S3
 ├── config/
 │   ├── event-pattern.json  # Pattern JSON untuk filter EventBridge
 │   ├── bucket-policy.json  # Kebijakan S3 untuk memblokir file .png
-│   └── sns-policy.json     # Kebijakan izin akses S3 ke Amazon SNS
+│   └── sns-policy.json     # Kebijakan gerbang izin akses SNS
 └── README.md               # Dokumentasi utama proyek
+```
