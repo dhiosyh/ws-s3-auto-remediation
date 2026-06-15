@@ -1,6 +1,6 @@
 # Sistem Manajemen Insiden dan Remediasi Keamanan Otomatis pada Penyimpanan Cloud Amazon S3 cloud
 
-Proyek arsitektur *cloud* ini mengimplementasikan sistem mitigasi komprehensif yang mengombinasikan pertahanan proaktif di level data (pencegahan) dan pemulihan otomatis di level arsitektur (remediasi) secara *real-time* menggunakan pendekatan **Event-Driven Architecture (EDA)**.
+Proyek arsitektur *cloud* ini mengimplementasikan sistem mitigasi komprehensif yang mengombinasikan pertahanan proaktif di level data (pencegahan) dan pemulihan otomatis di level arsitektur (remediasi) secara real-time menggunakan pendekatan Event-Driven Architecture (EDA).
 
 ## 👥 Anggota Kelompok
 * Dhio Rahmansyah (235150301111013)
