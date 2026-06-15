@@ -1,77 +1,32 @@
-# AWS S3 Auto-Remediation System using Event-Driven Architecture
+# Sistem Manajemen Insiden dan Remediasi Keamanan Otomatis pada Penyimpanan Cloud Amazon S3 🛡️ cloud
 
-Proyek ini merupakan sistem mitigasi dan remediasi keamanan otomatis (*auto-remediation*) pada penyimpanan cloud Amazon S3 berbasis *Event-Driven Architecture*. Sistem ini dirancang untuk mendeteksi celah keamanan berupa pengubahan akses *bucket* S3 menjadi publik secara tidak sah (akibat *human error* atau serangan) dan secara otomatis mengunci kembali *bucket* tersebut menjadi *private* dalam hitungan detik.
+Proyek arsitektur *cloud* ini mengimplementasikan sistem mitigasi komprehensif yang mengombinasikan pertahanan proaktif di level data (pencegahan) dan pemulihan otomatis di level arsitektur (remediasi) secara *real-time* menggunakan pendekatan **Event-Driven Architecture (EDA)**.
 
-## 👥 Anggota Kelompok
-* **Dhio Rahmansyah** - Teknik Komputer, Fakultas Ilmu Komputer, Universitas Brawijaya
-* **Akmal Ahmad Ghozali** - Teknik Komputer, Fakultas Ilmu Komputer, Universitas Brawijaya
-* **Muhfi Fawwaz Rizqullah** - Teknik Komputer, Fakultas Ilmu Komputer, Universitas Brawijaya
-* **Muhammad Irsyaddhia Fahlevi** - Teknik Komputer, Fakultas Ilmu Komputer, Universitas Brawijaya
+## 👥 Tim Pengembang
+* Dhio Rahmansyah (235150301111013)
+* Akmal Ahmad Ghozali (235150300111006)
+* Muhammad Irsyaddhia Fahlevi (235150307111001)
+* Muhfi Fawwaz Rizqullah (235150307111009)
 
----
-
-## 🏗️ Arsitektur Sistem
-
-Sistem ini menggunakan pendekatan *serverless* dan *event-driven* dengan alur kerja sebagai berikut:
-1. **Pemicu Ancaman:** Entitas (skrip `S3-Security-Breaker`) mengubah konfigurasi S3 Bucket menjadi *Public* atau menyuntikkan *public bucket policy*.
-2. **Pencatatan Aktivitas:** AWS CloudTrail menangkap aktivitas *API Call* tersebut (`PutBucketPolicy` / `PutPublicAccessBlock`).
-3. **Penyaringan Event:** Amazon EventBridge Rule menyaring log dari CloudTrail menggunakan pola JSON spesifik.
-4. **Eksekusi Remediasi:** AWS Lambda (`S3-Auto-Guardian`) dipicu oleh EventBridge untuk mengeksekusi kode pemulihan (mengaktifkan *Block Public Access* dan menghapus policy publik).
-
-[S3 Bucket] ──(Aktivitas Publik)──> [AWS CloudTrail]
-│
-(Log Event API)
-▼
-[AWS Lambda Guardian] <──(Trigger)── [Amazon EventBridge Rule]
-
+*(Universitas Brawijaya - Fakultas Ilmu Komputer - Teknik Komputer)*
 
 ---
 
-## 📁 Struktur Repositori
+## 🚀 Fitur Utama Sistem
+1. **Keamanan Level Data (Pertahanan Preventif):** Menggunakan *S3 Bucket Policy* untuk memblokir secara instan setiap unggahan file terlarang (seperti `.png`) di pintu masuk paling depan.
+2. **Pemantauan Aktif (Efficient Monitoring):** Terintegrasi dengan *S3 Event Notifications* dan *Amazon SNS* untuk mengirimkan log audit berupa notifikasi email secara *real-time* hanya ketika file yang sah berhasil diunggah.
+3. **Simulasi Ancaman (Breaker):** Skrip komputasi *serverless* AWS Lambda yang mensimulasikan kegagalan sistem/*human error* dengan membuka gembok S3 menjadi *Public* sekaligus memicu alarm darurat instan ke email administrator.
+4. **Remediasi Otomatis (Guardian):** Fungsi Lambda taktis yang dipicu secara reaktif oleh *Amazon EventBridge* untuk seketika mengunci kembali status *bucket* menjadi *Private* dan menghapus kebijakan publik yang tidak sah.
 
-```text
-├── config/
-│   └── event-pattern.json     # Konfigurasi JSON Pattern untuk Amazon EventBridge
-├── src/
-│   ├── breaker.py             # Source code Lambda Simulator Penyerang
-│   └── guardian.py            # Source code Lambda Agen Penyelamat (Remediasi)
-└── README.md                  # Dokumentasi Utama Proyek
-🛠️ Komponen & Kode Sumber
-1. Lambda Security Breaker (src/breaker.py)
-Skrip Python (Boto3) yang mensimulasikan kelalaian admin dengan mematikan fitur Block Public Access dan membuka akses read ke publik pada bucket target.
+---
 
-2. Lambda Auto Guardian (src/guardian.py)
-Skrip Python (Boto3) yang berfungsi sebagai agen penyelamat. Skrip ini akan menghapus bucket policy publik dan menyalakan kembali seluruh fitur perlindungan Block Public Access.
+## 🏗️ Komponen Arsitektur AWS
+* **Amazon S3:** Tempat penyimpanan utama sekaligus garis pertahanan pertama (*Bucket Policy*).
+* **AWS CloudTrail:** Pencatat log audit operasional *API Call*.
+* **Amazon EventBridge:** Broker penyaring *event* berdasarkan *pattern* JSON.
+* **AWS Lambda:** Eksekutor komputasi untuk fungsi `S3-Security-Breaker` & `S3-Auto-Guardian`.
+* **Amazon SNS:** Pusat distribusi pesan (*messaging hub*) untuk pengiriman notifikasi email.
 
-3. EventBridge Event Pattern (config/event-pattern.json)
-Konfigurasi filter JSON yang ditanamkan pada Amazon EventBridge untuk mendeteksi perubahan konfigurasi keamanan pada S3:
+---
 
-JSON
-{
-  "source": ["aws.s3"],
-  "detail-type": ["AWS API Call via CloudTrail"],
-  "detail": {
-    "eventSource": ["s3.amazonaws.com"],
-    "eventName": ["PutBucketPolicy", "PutBucketAcl", "PutPublicAccessBlock"]
-  }
-}
-🧪 Skenario Pengujian & Demo
-Sistem ini mendukung dua mekanisme pengujian fungsionalitas:
-
-A. Pengujian End-to-End Otomatis
-Jalankan fungsi Lambda S3-Security-Breaker melalui tombol Test.
-
-Periksa tab Permissions pada S3 Bucket, status akan berubah menjadi Public (Merah).
-
-Tunggu log aktivitas diproses oleh AWS CloudTrail (mengalami jeda/latency sekitar 5-15 menit pada arsitektur pencatatan log default AWS).
-
-Sistem EventBridge akan memicu S3-Auto-Guardian secara otomatis untuk mengembalikan status bucket menjadi Private.
-
-B. Pengujian Instan (Manual Invocation)
-Skenario ini digunakan untuk keperluan demonstrasi fungsionalitas logika kode secara cepat guna menghindari jeda waktu pengiriman log AWS CloudTrail:
-
-Jalankan fungsi Lambda S3-Security-Breaker untuk membuka celah keamanan (S3 menjadi Public).
-
-Eksekusi langsung fungsi Lambda S3-Auto-Guardian menggunakan tombol Test di konsol AWS Lambda.
-
-Status S3 Bucket akan langsung pulih menjadi Private secara instan (< 1 detik).
+## 📂 Struktur Direktori Repository
